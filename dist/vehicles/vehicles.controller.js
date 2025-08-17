@@ -15,43 +15,48 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.VehiclesController = void 0;
 const common_1 = require("@nestjs/common");
 const vehicles_service_1 = require("./vehicles.service");
+const vehicle_registration_dto_1 = require("./dto/vehicle-registration.dto");
 let VehiclesController = class VehiclesController {
     vehiclesService;
     constructor(vehiclesService) {
         this.vehiclesService = vehiclesService;
     }
     async registreIngreso(body) {
-        const result = await this.vehiclesService.registreIngreso(body.plate, body.parkingId);
-        if (result === 'already_parked') {
-            throw new common_1.BadRequestException({ message: 'El vehículo ya está parqueado en algún parqueadero.' });
-        }
-        return { message: 'Ingreso registrado exitosamente', plate: body.plate, parkingId: body.parkingId };
+        const result = await this.vehiclesService.registreIngreso(body.plate, body.parkingId, body.email, body.ownerName);
+        return result;
     }
     async registrarSalida(body) {
         const result = await this.vehiclesService.registrarSalida(body.plate, body.parkingId);
-        if (result === 'not_parked') {
-            throw new common_1.BadRequestException({ message: 'El vehículo no está actualmente parqueado en ese parqueadero.' });
-        }
-        return { message: 'Salida registrada exitosamente', plate: body.plate, parkingId: body.parkingId };
+        return result;
     }
     async listVehiculosParqueados(parkingId) {
         return this.vehiclesService.listVehiculosParqueados(parkingId);
+    }
+    async getVehicleInfo(plate) {
+        return this.vehiclesService.getVehicleInfo(plate);
+    }
+    async enviarCorreoRegistro(body) {
+        return this.vehiclesService.sendVehicleRegistrationEmail(body.email, body.placa, body.mensaje, body.parqueaderoId);
+    }
+    async registroCompleto(body) {
+        const result = await this.vehiclesService.registreIngreso(body.plate, body.parkingId, body.email, body.ownerName);
+        return result;
     }
 };
 exports.VehiclesController = VehiclesController;
 __decorate([
     (0, common_1.Post)('registre-ingreso'),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, common_1.Body)(new common_1.ValidationPipe())),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [vehicle_registration_dto_1.VehicleRegistrationDto]),
     __metadata("design:returntype", Promise)
 ], VehiclesController.prototype, "registreIngreso", null);
 __decorate([
     (0, common_1.Post)('registrar-salida'),
     (0, common_1.HttpCode)(200),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, common_1.Body)(new common_1.ValidationPipe())),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [vehicle_registration_dto_1.VehicleExitDto]),
     __metadata("design:returntype", Promise)
 ], VehiclesController.prototype, "registrarSalida", null);
 __decorate([
@@ -61,6 +66,27 @@ __decorate([
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)
 ], VehiclesController.prototype, "listVehiculosParqueados", null);
+__decorate([
+    (0, common_1.Get)('info/:plate'),
+    __param(0, (0, common_1.Param)('plate')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], VehiclesController.prototype, "getVehicleInfo", null);
+__decorate([
+    (0, common_1.Post)('enviar-correo-registro'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], VehiclesController.prototype, "enviarCorreoRegistro", null);
+__decorate([
+    (0, common_1.Post)('registro-completo'),
+    __param(0, (0, common_1.Body)(new common_1.ValidationPipe())),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [vehicle_registration_dto_1.VehicleRegistrationWithEmailDto]),
+    __metadata("design:returntype", Promise)
+], VehiclesController.prototype, "registroCompleto", null);
 exports.VehiclesController = VehiclesController = __decorate([
     (0, common_1.Controller)('vehicles'),
     __metadata("design:paramtypes", [vehicles_service_1.VehiclesService])

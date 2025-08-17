@@ -49,7 +49,7 @@ API para gestionar parqueaderos de socios, registro de vehículos, historial, in
 - `src/parkings`: Parqueaderos
 - `src/vehicles`: Vehículos y registros
 - `src/indicators`: Indicadores y reportes
-- `src/mail`: Simulación de envío de correo
+- `src/mail`: **Microservicio de simulación de envío de correo** ✨
 - `src/common`: Utilidades, DTOs, pipes, guards
 
 ## Observaciones
@@ -57,6 +57,7 @@ API para gestionar parqueaderos de socios, registro de vehículos, historial, in
 - El sistema usa patrón de servicios/repositorios
 - Endpoints protegidos por roles y JWT
 - Validaciones y manejo de errores con excepciones
+- **Microservicio de correo con simulación completa** ✨
 - Documentación y colección Postman incluidas
 
 ## Ejemplo de configuración .env

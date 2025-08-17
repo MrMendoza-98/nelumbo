@@ -1,10 +1,22 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
-@Entity()
+@Entity('vehicles')
 export class Vehicle {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 6, unique: true })
+  @Column({ length: 10, unique: true })
   plate: string;
+
+  @Column({ nullable: true, length: 100 })
+  ownerName?: string;
+
+  @Column({ nullable: true, length: 100 })
+  email?: string;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

@@ -14,6 +14,10 @@ const typeorm_1 = require("typeorm");
 let Vehicle = class Vehicle {
     id;
     plate;
+    ownerName;
+    email;
+    createdAt;
+    updatedAt;
 };
 exports.Vehicle = Vehicle;
 __decorate([
@@ -21,10 +25,26 @@ __decorate([
     __metadata("design:type", Number)
 ], Vehicle.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ length: 6, unique: true }),
+    (0, typeorm_1.Column)({ length: 10, unique: true }),
     __metadata("design:type", String)
 ], Vehicle.prototype, "plate", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true, length: 100 }),
+    __metadata("design:type", String)
+], Vehicle.prototype, "ownerName", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true, length: 100 }),
+    __metadata("design:type", String)
+], Vehicle.prototype, "email", void 0);
+__decorate([
+    (0, typeorm_1.CreateDateColumn)(),
+    __metadata("design:type", Date)
+], Vehicle.prototype, "createdAt", void 0);
+__decorate([
+    (0, typeorm_1.UpdateDateColumn)(),
+    __metadata("design:type", Date)
+], Vehicle.prototype, "updatedAt", void 0);
 exports.Vehicle = Vehicle = __decorate([
-    (0, typeorm_1.Entity)()
+    (0, typeorm_1.Entity)('vehicles')
 ], Vehicle);
 //# sourceMappingURL=vehicle.entity.js.map

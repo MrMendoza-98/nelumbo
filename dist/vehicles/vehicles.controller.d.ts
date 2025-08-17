@@ -1,25 +1,29 @@
 import { VehiclesService } from './vehicles.service';
+import { VehicleRegistrationDto, VehicleExitDto, VehicleRegistrationWithEmailDto } from './dto/vehicle-registration.dto';
 export declare class VehiclesController {
     private readonly vehiclesService;
     constructor(vehiclesService: VehiclesService);
-    registreIngreso(body: {
+    registreIngreso(body: VehicleRegistrationDto): Promise<import("./interfaces/vehicle.interface").VehicleRegistrationResult>;
+    registrarSalida(body: VehicleExitDto): Promise<import("./interfaces/vehicle.interface").VehicleExitResult>;
+    listVehiculosParqueados(parkingId: number): Promise<import("./interfaces/vehicle.interface").ParkedVehicle[]>;
+    getVehicleInfo(plate: string): Promise<{
+        id: number;
         plate: string;
-        parkingId: number;
-    }): Promise<{
-        message: string;
-        plate: string;
-        parkingId: number;
+        ownerName: string | undefined;
+        email: string | undefined;
+        createdAt: Date;
+        updatedAt: Date;
+        isCurrentlyParked: boolean;
+        currentParkingId: number | null;
+        currentEntryTime: Date | null;
     }>;
-    registrarSalida(body: {
-        plate: string;
-        parkingId: number;
+    enviarCorreoRegistro(body: {
+        email: string;
+        placa: string;
+        mensaje: string;
+        parqueaderoId: number;
     }): Promise<{
-        message: string;
-        plate: string;
-        parkingId: number;
+        mensaje: string;
     }>;
-    listVehiculosParqueados(parkingId: number): Promise<{
-        plate: string;
-        entryTime: Date;
-    }[]>;
+    registroCompleto(body: VehicleRegistrationWithEmailDto): Promise<import("./interfaces/vehicle.interface").VehicleRegistrationResult>;
 }
