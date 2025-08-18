@@ -1,4 +1,6 @@
-import { Controller, Post, Body, Get, Param, BadRequestException, HttpCode, ValidationPipe } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, BadRequestException, HttpCode, ValidationPipe, UseGuards } from '@nestjs/common';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { Roles } from '../common/decorators/roles.decorator';
 import { VehiclesService } from './vehicles.service';
 import { VehicleRegistrationDto, VehicleExitDto, VehicleRegistrationWithEmailDto } from './dto/vehicle-registration.dto';
 
@@ -6,27 +8,32 @@ import { VehicleRegistrationDto, VehicleExitDto, VehicleRegistrationWithEmailDto
 export class VehiclesController {
   constructor(private readonly vehiclesService: VehiclesService) {}
 
-  @Post('registre-ingreso')
-  async registreIngreso(@Body(new ValidationPipe()) body: VehicleRegistrationDto) {
+  @Post('register-entry')
+  @UseGuards(RolesGuard)
+  @Roles('SOCIO')
+  async registerEntry(@Body(new ValidationPipe()) body: VehicleRegistrationDto) {
     const result = await this.vehiclesService.registreIngreso(
       body.plate, 
       body.parkingId, 
       body.email, 
       body.ownerName
     );
-    
     return result;
   }
 
-  @Post('registrar-salida')
+  @Post('register-exit')
+  @UseGuards(RolesGuard)
+  @Roles('SOCIO')
   @HttpCode(200)
-  async registrarSalida(@Body(new ValidationPipe()) body: VehicleExitDto) {
+  async registerExit(@Body(new ValidationPipe()) body: VehicleExitDto) {
     const result = await this.vehiclesService.registrarSalida(body.plate, body.parkingId);
     return result;
   }
 
-  @Get('parqueados/:parkingId')
-  async listVehiculosParqueados(@Param('parkingId') parkingId: number) {
+  @Get('parked/:parkingId')
+  @UseGuards(RolesGuard)
+  @Roles('SOCIO', 'ADMIN')
+  async listParkedVehicles(@Param('parkingId') parkingId: number) {
     return this.vehiclesService.listVehiculosParqueados(parkingId);
   }
 
@@ -41,7 +48,6 @@ export class VehiclesController {
     @Param('parkingId') parkingId: number,
   ) {
     const isValid = await this.vehiclesService.isVehicleInParking(plate, parkingId);
-    
     return {
       plate,
       parkingId,
@@ -54,6 +60,8 @@ export class VehiclesController {
   }
 
   @Get('info/:plate/:parkingId')
+  @UseGuards(RolesGuard)
+  @Roles('SOCIO', 'ADMIN')
   async getVehicleInfoInParking(
     @Param('plate') plate: string,
     @Param('parkingId') parkingId: number,
@@ -61,28 +69,28 @@ export class VehiclesController {
     return this.vehiclesService.getVehicleInfoInParking(plate, parkingId);
   }
 
-  @Post('enviar-correo-registro')
-  async enviarCorreoRegistro(
+  @Post('send-registration-email')
+  async sendRegistrationEmail(
     @Body() body: {
       email: string;
-      placa: string;
-      mensaje: string;
-      parqueaderoId: number;
+      plate: string;
+      message: string;
+      parkingId: number;
     },
   ) {
     return this.vehiclesService.sendVehicleRegistrationEmail(
       body.email,
-      body.placa,
-      body.mensaje,
-      body.parqueaderoId,
+      body.plate,
+      body.message,
+      body.parkingId,
     );
   }
 
   /**
    * Registro de vehículo con envío automático de correo
    */
-  @Post('registro-completo')
-  async registroCompleto(
+  @Post('full-registration')
+  async fullRegistration(
     @Body(new ValidationPipe()) body: VehicleRegistrationWithEmailDto,
   ) {
     const result = await this.vehiclesService.registreIngreso(
@@ -91,7 +99,6 @@ export class VehiclesController {
       body.email, 
       body.ownerName
     );
-    
     return result;
   }
 }

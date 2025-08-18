@@ -14,6 +14,8 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VehiclesController = void 0;
 const common_1 = require("@nestjs/common");
+const roles_guard_1 = require("../common/guards/roles.guard");
+const roles_decorator_1 = require("../common/decorators/roles.decorator");
 const vehicles_service_1 = require("./vehicles.service");
 const vehicle_registration_dto_1 = require("./dto/vehicle-registration.dto");
 let VehiclesController = class VehiclesController {
@@ -21,15 +23,15 @@ let VehiclesController = class VehiclesController {
     constructor(vehiclesService) {
         this.vehiclesService = vehiclesService;
     }
-    async registreIngreso(body) {
+    async registerEntry(body) {
         const result = await this.vehiclesService.registreIngreso(body.plate, body.parkingId, body.email, body.ownerName);
         return result;
     }
-    async registrarSalida(body) {
+    async registerExit(body) {
         const result = await this.vehiclesService.registrarSalida(body.plate, body.parkingId);
         return result;
     }
-    async listVehiculosParqueados(parkingId) {
+    async listParkedVehicles(parkingId) {
         return this.vehiclesService.listVehiculosParqueados(parkingId);
     }
     async getVehicleInfo(plate) {
@@ -50,37 +52,43 @@ let VehiclesController = class VehiclesController {
     async getVehicleInfoInParking(plate, parkingId) {
         return this.vehiclesService.getVehicleInfoInParking(plate, parkingId);
     }
-    async enviarCorreoRegistro(body) {
-        return this.vehiclesService.sendVehicleRegistrationEmail(body.email, body.placa, body.mensaje, body.parqueaderoId);
+    async sendRegistrationEmail(body) {
+        return this.vehiclesService.sendVehicleRegistrationEmail(body.email, body.plate, body.message, body.parkingId);
     }
-    async registroCompleto(body) {
+    async fullRegistration(body) {
         const result = await this.vehiclesService.registreIngreso(body.plate, body.parkingId, body.email, body.ownerName);
         return result;
     }
 };
 exports.VehiclesController = VehiclesController;
 __decorate([
-    (0, common_1.Post)('registre-ingreso'),
+    (0, common_1.Post)('register-entry'),
+    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('SOCIO'),
     __param(0, (0, common_1.Body)(new common_1.ValidationPipe())),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [vehicle_registration_dto_1.VehicleRegistrationDto]),
     __metadata("design:returntype", Promise)
-], VehiclesController.prototype, "registreIngreso", null);
+], VehiclesController.prototype, "registerEntry", null);
 __decorate([
-    (0, common_1.Post)('registrar-salida'),
+    (0, common_1.Post)('register-exit'),
+    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('SOCIO'),
     (0, common_1.HttpCode)(200),
     __param(0, (0, common_1.Body)(new common_1.ValidationPipe())),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [vehicle_registration_dto_1.VehicleExitDto]),
     __metadata("design:returntype", Promise)
-], VehiclesController.prototype, "registrarSalida", null);
+], VehiclesController.prototype, "registerExit", null);
 __decorate([
-    (0, common_1.Get)('parqueados/:parkingId'),
+    (0, common_1.Get)('parked/:parkingId'),
+    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('SOCIO', 'ADMIN'),
     __param(0, (0, common_1.Param)('parkingId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)
-], VehiclesController.prototype, "listVehiculosParqueados", null);
+], VehiclesController.prototype, "listParkedVehicles", null);
 __decorate([
     (0, common_1.Get)('info/:plate'),
     __param(0, (0, common_1.Param)('plate')),
@@ -98,6 +106,8 @@ __decorate([
 ], VehiclesController.prototype, "validateVehicleInParking", null);
 __decorate([
     (0, common_1.Get)('info/:plate/:parkingId'),
+    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('SOCIO', 'ADMIN'),
     __param(0, (0, common_1.Param)('plate')),
     __param(1, (0, common_1.Param)('parkingId')),
     __metadata("design:type", Function),
@@ -105,19 +115,19 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], VehiclesController.prototype, "getVehicleInfoInParking", null);
 __decorate([
-    (0, common_1.Post)('enviar-correo-registro'),
+    (0, common_1.Post)('send-registration-email'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
-], VehiclesController.prototype, "enviarCorreoRegistro", null);
+], VehiclesController.prototype, "sendRegistrationEmail", null);
 __decorate([
-    (0, common_1.Post)('registro-completo'),
+    (0, common_1.Post)('full-registration'),
     __param(0, (0, common_1.Body)(new common_1.ValidationPipe())),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [vehicle_registration_dto_1.VehicleRegistrationWithEmailDto]),
     __metadata("design:returntype", Promise)
-], VehiclesController.prototype, "registroCompleto", null);
+], VehiclesController.prototype, "fullRegistration", null);
 exports.VehiclesController = VehiclesController = __decorate([
     (0, common_1.Controller)('vehicles'),
     __metadata("design:paramtypes", [vehicles_service_1.VehiclesService])
