@@ -24,14 +24,13 @@
 # API REST Control de Vehículos en Parqueaderos
 
 ## Descripción
-API para gestionar parqueaderos de socios, registro de vehículos, historial, indicadores y simulación de envío de correos. Protegida por JWT y roles (ADMIN, SOCIO).
-
-## Requisitos
-- Node.js >= 18
-- PostgreSQL
-
-## Instalación
 1. Clonar el repositorio
+# Ejemplo completo
+
+Puedes consultar el ejemplo completo de uso, endpoints, estructura y modelo entidad relación en:
+
+`docs/parking-api-example.md`
+
 2. Instalar dependencias:
    ```bash
    npm install
@@ -78,19 +77,4 @@ JWT_SECRET=tu_jwt_secret
 4. Ejecuta migraciones y seed
 5. Ejecuta `npm run start:dev`
 
-## Enlace de descarga
-El enlace de descarga y la colección Postman se proporcionarán al finalizar el desarrollo.
 
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
