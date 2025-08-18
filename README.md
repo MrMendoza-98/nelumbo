@@ -67,7 +67,6 @@ DB_PORT=5432
 DB_USER=postgres
 DB_PASS=tu_password
 DB_NAME=nelumbo
-JWT_SECRET=tu_jwt_secret
 ```
 
 ## Cómo correr el proyecto en local
@@ -76,5 +75,17 @@ JWT_SECRET=tu_jwt_secret
 3. Ejecuta `npm install`
 4. Ejecuta migraciones y seed
 5. Ejecuta `npm run start:dev`
+
+
+# Ejecución con Docker
+
+1. Asegúrate de tener Docker y Docker Compose instalados.
+2. Ejecuta el siguiente comando en la raíz del proyecto:
+  ```bash
+  docker-compose up --build
+  ```
+3. La API estará disponible en `http://localhost:3000` y la base de datos PostgreSQL en el puerto `5432`.
+
+Puedes modificar las variables de entorno en `docker-compose.yml` según tus necesidades.
 
 
