@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VehiclesController = void 0;
 const common_1 = require("@nestjs/common");
+const jwt_auth_guard_1 = require("../common/guards/jwt-auth.guard");
 const roles_guard_1 = require("../common/guards/roles.guard");
 const roles_decorator_1 = require("../common/decorators/roles.decorator");
 const vehicles_service_1 = require("./vehicles.service");
@@ -63,7 +64,7 @@ let VehiclesController = class VehiclesController {
 exports.VehiclesController = VehiclesController;
 __decorate([
     (0, common_1.Post)('register-entry'),
-    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)('SOCIO'),
     __param(0, (0, common_1.Body)(new common_1.ValidationPipe())),
     __metadata("design:type", Function),
@@ -72,7 +73,7 @@ __decorate([
 ], VehiclesController.prototype, "registerEntry", null);
 __decorate([
     (0, common_1.Post)('register-exit'),
-    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)('SOCIO'),
     (0, common_1.HttpCode)(200),
     __param(0, (0, common_1.Body)(new common_1.ValidationPipe())),
@@ -82,7 +83,7 @@ __decorate([
 ], VehiclesController.prototype, "registerExit", null);
 __decorate([
     (0, common_1.Get)('parked/:parkingId'),
-    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)('SOCIO', 'ADMIN'),
     __param(0, (0, common_1.Param)('parkingId')),
     __metadata("design:type", Function),
@@ -106,7 +107,7 @@ __decorate([
 ], VehiclesController.prototype, "validateVehicleInParking", null);
 __decorate([
     (0, common_1.Get)('info/:plate/:parkingId'),
-    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)('SOCIO', 'ADMIN'),
     __param(0, (0, common_1.Param)('plate')),
     __param(1, (0, common_1.Param)('parkingId')),

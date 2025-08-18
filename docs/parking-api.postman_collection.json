@@ -1,0 +1,99 @@
+{
+  "info": {
+    "name": "Parking API",
+    "description": "Colección de endpoints para gestión de parqueaderos.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth - Login",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "url": {"raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"]},
+        "body": {"mode": "raw", "raw": "{\n  \"email\": \"admin@email.com\",\n  \"password\": \"admin123\"\n}"}
+      },
+      "response": [{"body": "{\n  \"accessToken\": \"jwt_token\"\n}"}]
+    },
+    {
+      "name": "Users - Create",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "url": {"raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"]},
+        "body": {"mode": "raw", "raw": "{\n  \"name\": \"Socio Ejemplo\",\n  \"email\": \"socio@email.com\",\n  \"password\": \"socio123\",\n  \"role\": \"SOCIO\"\n}"}
+      },
+      "response": [{"body": "{\n  \"id\": 2,\n  \"name\": \"Socio Ejemplo\",\n  \"email\": \"socio@email.com\",\n  \"role\": \"SOCIO\"\n}"}]
+    },
+    {
+      "name": "Parkings - List",
+      "request": {
+        "method": "GET",
+        "url": {"raw": "{{baseUrl}}/parkings", "host": ["{{baseUrl}}"], "path": ["parkings"]}
+      },
+      "response": [{"body": "[{\n  \"id\": 1,\n  \"name\": \"Central Parking\",\n  \"address\": \"Calle 123\",\n  \"capacity\": 50,\n  \"price_per_hour\": 3000,\n  \"ownerId\": 2\n}]"}]
+    },
+    {
+      "name": "Vehicles - Register Entry",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "url": {"raw": "{{baseUrl}}/vehicles/register-entry", "host": ["{{baseUrl}}"], "path": ["vehicles", "register-entry"]},
+        "body": {"mode": "raw", "raw": "{\n  \"plate\": \"ABC123\",\n  \"parkingId\": 1,\n  \"email\": \"owner@email.com\",\n  \"ownerName\": \"Juan Perez\"\n}"}
+      },
+      "response": [{"body": "{\n  \"message\": \"Vehicle entry registered successfully\",\n  \"recordId\": 10\n}"}]
+    },
+    {
+      "name": "Vehicles - Register Exit",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "url": {"raw": "{{baseUrl}}/vehicles/register-exit", "host": ["{{baseUrl}}"], "path": ["vehicles", "register-exit"]},
+        "body": {"mode": "raw", "raw": "{\n  \"plate\": \"ABC123\",\n  \"parkingId\": 1\n}"}
+      },
+      "response": [{"body": "{\n  \"message\": \"Vehicle exit registered successfully\",\n  \"totalPrice\": 6000\n}"}]
+    },
+    {
+      "name": "Vehicles - List Parked",
+      "request": {
+        "method": "GET",
+        "url": {"raw": "{{baseUrl}}/vehicles/parked/1", "host": ["{{baseUrl}}"], "path": ["vehicles", "parked", "1"]}
+      },
+      "response": [{"body": "[{\n  \"plate\": \"ABC123\",\n  \"entryTime\": \"2025-08-18T10:00:00Z\"\n}]"}]
+    },
+    {
+      "name": "Vehicles - Info in Parking",
+      "request": {
+        "method": "GET",
+        "url": {"raw": "{{baseUrl}}/vehicles/info/ABC123/1", "host": ["{{baseUrl}}"], "path": ["vehicles", "info", "ABC123", "1"]}
+      },
+      "response": [{"body": "{\n  \"plate\": \"ABC123\",\n  \"parkingId\": 1,\n  \"entryTime\": \"2025-08-18T10:00:00Z\",\n  \"ownerName\": \"Juan Perez\"\n}"}]
+    },
+    {
+      "name": "Indicators - Top Vehicles",
+      "request": {
+        "method": "GET",
+        "url": {"raw": "{{baseUrl}}/indicators/top-vehicles", "host": ["{{baseUrl}}"], "path": ["indicators", "top-vehicles"]}
+      },
+      "response": [{"body": "{\n  \"vehicles\": [{\n    \"plate\": \"ABC123\",\n    \"parkingId\": 1,\n    \"count\": 5\n  }],\n  \"total\": 1,\n  \"summary\": {\n    \"totalRegistrations\": 5,\n    \"averageRegistrations\": 5,\n    \"mostFrequentVehicle\": \"ABC123\",\n    \"mostFrequentParkingId\": 1,\n    \"mostFrequentCount\": 5\n  },\n  \"timestamp\": \"2025-08-18T12:00:00Z\"\n}"}]
+    },
+    {
+      "name": "Indicators - Earnings",
+      "request": {
+        "method": "GET",
+        "url": {"raw": "{{baseUrl}}/indicators/earnings/1", "host": ["{{baseUrl}}"], "path": ["indicators", "earnings", "1"]}
+      },
+      "response": [{"body": "{\n  \"today\": 6000,\n  \"week\": 42000,\n  \"month\": 180000,\n  \"year\": 1200000\n}"}]
+    },
+    {
+      "name": "Mail - Send",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "url": {"raw": "{{baseUrl}}/mail/send", "host": ["{{baseUrl}}"], "path": ["mail", "send"]},
+        "body": {"mode": "raw", "raw": "{\n  \"email\": \"socio@email.com\",\n  \"subject\": \"Notificación\",\n  \"message\": \"Su parqueadero ha sido actualizado.\"\n}"}
+      },
+      "response": [{"body": "{\n  \"message\": \"Email sent successfully (simulated)\"\n}"}]
+    }
+  ]
+}

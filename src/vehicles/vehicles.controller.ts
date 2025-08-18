@@ -1,4 +1,5 @@
 import { Controller, Post, Body, Get, Param, BadRequestException, HttpCode, ValidationPipe, UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { VehiclesService } from './vehicles.service';
@@ -9,7 +10,7 @@ export class VehiclesController {
   constructor(private readonly vehiclesService: VehiclesService) {}
 
   @Post('register-entry')
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('SOCIO')
   async registerEntry(@Body(new ValidationPipe()) body: VehicleRegistrationDto) {
     const result = await this.vehiclesService.registreIngreso(
@@ -22,7 +23,7 @@ export class VehiclesController {
   }
 
   @Post('register-exit')
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('SOCIO')
   @HttpCode(200)
   async registerExit(@Body(new ValidationPipe()) body: VehicleExitDto) {
@@ -31,7 +32,7 @@ export class VehiclesController {
   }
 
   @Get('parked/:parkingId')
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('SOCIO', 'ADMIN')
   async listParkedVehicles(@Param('parkingId') parkingId: number) {
     return this.vehiclesService.listVehiculosParqueados(parkingId);
@@ -60,7 +61,7 @@ export class VehiclesController {
   }
 
   @Get('info/:plate/:parkingId')
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('SOCIO', 'ADMIN')
   async getVehicleInfoInParking(
     @Param('plate') plate: string,

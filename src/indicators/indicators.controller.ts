@@ -13,10 +13,6 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 
-const Role = {
-  ADMIN: 'ADMIN' as const,
-  SOCIO: 'SOCIO' as const,
-} as const;
 
 @Controller('indicators')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -29,7 +25,7 @@ export class IndicatorsController {
    */
   @Get('top-vehicles')
   @HttpCode(HttpStatus.OK)
-  @Roles(Role.ADMIN, Role.SOCIO)
+  @Roles('ADMIN', 'SOCIO')
   async getTop10MostFrequentVehicles(): Promise<TopVehiclesResponse> {
     return this.indicatorsService.getTop10MostFrequentVehicles();
   }
@@ -41,7 +37,7 @@ export class IndicatorsController {
    */
   @Get('top-vehicles/parking/:parkingId')
   @HttpCode(HttpStatus.OK)
-  @Roles(Role.ADMIN, Role.SOCIO)
+  @Roles('ADMIN', 'SOCIO')
   async getTop10VehiclesByParking(
     @Param('parkingId') parkingId: number,
   ): Promise<TopVehiclesResponse> {
@@ -55,7 +51,7 @@ export class IndicatorsController {
    */
   @Get('first-time-parked/:parkingId')
   @HttpCode(HttpStatus.OK)
-  @Roles(Role.ADMIN, Role.SOCIO)
+  @Roles('ADMIN', 'SOCIO')
   async getFirstTimeParkedVehicles(
     @Param('parkingId') parkingId: number,
   ): Promise<{ plate: string; entryTime: Date }[]> {
@@ -69,7 +65,7 @@ export class IndicatorsController {
    */
   @Get('earnings/:parkingId')
   @HttpCode(HttpStatus.OK)
-  @Roles(Role.SOCIO)
+  @Roles('SOCIO')
   async getParkingEarnings(
     @Param('parkingId') parkingId: number,
   ): Promise<{ today: number; week: number; month: number; year: number }> {
@@ -83,7 +79,7 @@ export class IndicatorsController {
    */
   @Get('search-parked')
   @HttpCode(HttpStatus.OK)
-  @Roles(Role.ADMIN, Role.SOCIO)
+  @Roles('ADMIN', 'SOCIO')
   async searchParkedVehiclesByPlate(
     @Query('plate') partialPlate: string,
   ): Promise<{ plate: string; entryTime: Date; parkingId: number }[]> {
