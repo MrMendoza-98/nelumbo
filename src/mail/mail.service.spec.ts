@@ -109,8 +109,20 @@ describe('MailService', () => {
 
     it('should send bulk mail successfully', async () => {
       const mockResults = [
-        { success: true, message: 'Success 1' },
-        { success: true, message: 'Success 2' },
+        {
+          success: true,
+          message: 'Success 1',
+          mailId: 1,
+          sentAt: new Date(),
+          recipient: 'test1@example.com',
+        },
+        {
+          success: true,
+          message: 'Success 2',
+          mailId: 2,
+          sentAt: new Date(),
+          recipient: 'test2@example.com',
+        },
       ];
 
       jest.spyOn(service, 'sendMail')

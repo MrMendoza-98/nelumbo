@@ -17,6 +17,7 @@ const auth_module_1 = require("./auth/auth.module");
 const parkings_module_1 = require("./parkings/parkings.module");
 const vehicles_module_1 = require("./vehicles/vehicles.module");
 const mail_module_1 = require("./mail/mail.module");
+const indicators_module_1 = require("./indicators/indicators.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -39,6 +40,7 @@ exports.AppModule = AppModule = __decorate([
             parkings_module_1.ParkingsModule,
             vehicles_module_1.VehiclesModule,
             mail_module_1.MailModule,
+            indicators_module_1.IndicatorsModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

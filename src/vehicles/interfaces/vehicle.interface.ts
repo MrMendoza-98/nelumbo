@@ -14,6 +14,7 @@ export interface VehicleExitResult {
   plate: string;
   parkingId: number;
   exitTime: Date;
+  totalPrice: number;
 }
 
 export interface ParkedVehicle {

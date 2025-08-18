@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull } from 'typeorm';
 import { Vehicle } from './vehicle.entity';
 import { ParkingRecord } from './parking-record.entity';
+import { Parking } from '../parkings/parking.entity';
+import { ParkingHistory } from './parking-history.entity';
 import { VehicleNotificationService } from './services/vehicle-notification.service';
 import { 
   VehicleRegistrationResult, 
@@ -20,6 +22,10 @@ export class VehiclesService {
     private readonly vehicleRepository: Repository<Vehicle>,
     @InjectRepository(ParkingRecord)
     private readonly parkingRecordRepository: Repository<ParkingRecord>,
+    @InjectRepository(Parking)
+    private readonly parkingRepository: Repository<Parking>,
+    @InjectRepository(ParkingHistory)
+    private readonly historyRepository: Repository<ParkingHistory>,
     private readonly notificationService: VehicleNotificationService,
   ) {}
 
@@ -27,15 +33,31 @@ export class VehiclesService {
    * Registra el ingreso de un vehículo al parqueadero
    */
   async registreIngreso(
-    plate: string, 
-    parkingId: number, 
+    plate: string,
+    parkingId: number,
     email?: string,
     ownerName?: string
   ): Promise<VehicleRegistrationResult> {
     this.logger.log(`Registrando ingreso del vehículo ${plate} al parqueadero ${parkingId}`);
 
-    // Validar que el vehículo no esté ya parqueado
+    // Validar formato de placa
+    const plateRegex = /^[A-Za-z0-9]{6}$/;
+    if (!plateRegex.test(plate) || plate.toLowerCase().includes('ñ')) {
+      throw new BadRequestException('La placa debe ser alfanumérica, de 6 caracteres, sin caracteres especiales ni la letra ñ');
+    }
+
+    // Validar que el vehículo no esté ya parqueado en ningún parqueadero
     await this.validateVehicleNotParked(plate);
+
+    // Validar capacidad máxima del parqueadero
+    const parking = await this.parkingRepository.findOne({ where: { id: parkingId } });
+    if (!parking) {
+      throw new BadRequestException(`Parqueadero ${parkingId} no encontrado`);
+    }
+    const count = await this.parkingRecordRepository.count({ where: { parkingId, exitTime: IsNull() } });
+    if (count >= parking.capacity) {
+      throw new BadRequestException(`El parqueadero ha alcanzado su capacidad máxima (${parking.capacity})`);
+    }
 
     // Registrar el vehículo y el ingreso
     const vehicle = await this.ensureVehicleExists(plate, email, ownerName);
@@ -71,6 +93,20 @@ export class VehiclesService {
   }
 
   /**
+   * Valida que un vehículo esté en un parqueadero específico
+   */
+  async isVehicleInParking(plate: string, parkingId: number): Promise<boolean> {
+    this.logger.log(`Validando que el vehículo ${plate} esté en el parqueadero ${parkingId}`);
+    
+    try {
+      await this.validateVehicleInParking(plate, parkingId);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
    * Registra la salida de un vehículo del parqueadero
    */
   async registrarSalida(plate: string, parkingId: number): Promise<VehicleExitResult> {
@@ -78,7 +114,31 @@ export class VehiclesService {
 
     const parkingRecord = await this.findActiveParkingRecord(plate, parkingId);
     parkingRecord.exitTime = new Date();
+
+    // Calcular precio automático
+    const parking = await this.parkingRepository.findOne({ where: { id: parkingId } });
+    if (!parking) {
+      throw new BadRequestException(`Parqueadero ${parkingId} no encontrado`);
+    }
+    const entry = parkingRecord.entryTime.getTime();
+    const exit = parkingRecord.exitTime.getTime();
+    const hours = Math.ceil((exit - entry) / (1000 * 60 * 60));
+    parkingRecord.totalPrice = Number(parking.price_per_hour) * hours;
+
     await this.parkingRecordRepository.save(parkingRecord);
+
+    // Mover a historial
+    const vehicleEntity = await this.vehicleRepository.findOne({ where: { plate } });
+    if (!vehicleEntity) {
+      throw new BadRequestException(`Vehículo con placa ${plate} no encontrado para historial`);
+    }
+    const history = new ParkingHistory();
+    history.vehicle = vehicleEntity;
+    history.parking = parking;
+    history.entry_time = parkingRecord.entryTime;
+    history.exit_time = parkingRecord.exitTime;
+    history.total_price = parkingRecord.totalPrice;
+    await this.historyRepository.save(history);
 
     this.logger.log(`Salida registrada exitosamente para vehículo ${plate}`);
 
@@ -87,7 +147,8 @@ export class VehiclesService {
       message: 'Salida registrada exitosamente',
       plate,
       parkingId,
-      exitTime: parkingRecord.exitTime
+      exitTime: parkingRecord.exitTime,
+      totalPrice: parkingRecord.totalPrice
     };
   }
 
@@ -139,6 +200,41 @@ export class VehiclesService {
   }
 
   /**
+   * Obtiene información de un vehículo en un parqueadero específico
+   */
+  async getVehicleInfoInParking(plate: string, parkingId: number) {
+    this.logger.log(`Obteniendo información del vehículo ${plate} en parqueadero ${parkingId}`);
+
+    const vehicle = await this.vehicleRepository.findOne({ where: { plate } });
+    if (!vehicle) {
+      throw new BadRequestException(`Vehículo con placa ${plate} no encontrado`);
+    }
+
+    // Buscar si está parqueado en el parqueadero específico
+    const parkingRecord = await this.parkingRecordRepository.findOne({
+      where: { plate, parkingId, exitTime: IsNull() }
+    });
+
+    if (!parkingRecord) {
+      throw new BadRequestException(`El vehículo con placa ${plate} no se encuentra en el parqueadero ${parkingId}`);
+    }
+
+    return {
+      id: vehicle.id,
+      plate: vehicle.plate,
+      ownerName: vehicle.ownerName,
+      email: vehicle.email,
+      createdAt: vehicle.createdAt,
+      updatedAt: vehicle.updatedAt,
+      parkingInfo: {
+        parkingId: parkingRecord.parkingId,
+        entryTime: parkingRecord.entryTime,
+        isCurrentlyParked: true
+      }
+    };
+  }
+
+  /**
    * Envía correo de registro de vehículo (método legacy para compatibilidad)
    */
   async sendVehicleRegistrationEmail(
@@ -170,7 +266,7 @@ export class VehiclesService {
   // Métodos privados para mantener el código limpio
 
   /**
-   * Valida que el vehículo no esté ya parqueado
+   * Valida que el vehículo no esté ya parqueado en ningún parqueadero
    */
   private async validateVehicleNotParked(plate: string): Promise<void> {
     const activeRecord = await this.parkingRecordRepository.findOne({
@@ -178,7 +274,20 @@ export class VehiclesService {
     });
 
     if (activeRecord) {
-      throw new BadRequestException(`El vehículo con placa ${plate} ya está parqueado en algún parqueadero`);
+      throw new BadRequestException(`El vehículo con placa ${plate} ya está parqueado en el parqueadero ${activeRecord.parkingId}`);
+    }
+  }
+
+  /**
+   * Valida que el vehículo esté en el parqueadero especificado
+   */
+  private async validateVehicleInParking(plate: string, parkingId: number): Promise<void> {
+    const activeRecord = await this.parkingRecordRepository.findOne({
+      where: { plate, parkingId, exitTime: IsNull() }
+    });
+
+    if (!activeRecord) {
+      throw new BadRequestException(`El vehículo con placa ${plate} no se encuentra en el parqueadero ${parkingId}`);
     }
   }
 

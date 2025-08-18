@@ -16,12 +16,14 @@ const vehicle_entity_1 = require("./vehicle.entity");
 const parking_record_entity_1 = require("./parking-record.entity");
 const mail_module_1 = require("../mail/mail.module");
 const parkings_module_1 = require("../parkings/parkings.module");
+const parking_entity_1 = require("../parkings/parking.entity");
+const parking_history_entity_1 = require("./parking-history.entity");
 let VehiclesModule = class VehiclesModule {
 };
 exports.VehiclesModule = VehiclesModule;
 exports.VehiclesModule = VehiclesModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([vehicle_entity_1.Vehicle, parking_record_entity_1.ParkingRecord]), mail_module_1.MailModule, parkings_module_1.ParkingsModule],
+        imports: [typeorm_1.TypeOrmModule.forFeature([vehicle_entity_1.Vehicle, parking_record_entity_1.ParkingRecord, parking_entity_1.Parking, parking_history_entity_1.ParkingHistory]), mail_module_1.MailModule, parkings_module_1.ParkingsModule],
         controllers: [vehicles_controller_1.VehiclesController],
         providers: [vehicles_service_1.VehiclesService, vehicle_notification_service_1.VehicleNotificationService],
         exports: [vehicles_service_1.VehiclesService],

@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { ParkingsModule } from './parkings/parkings.module';
 import { VehiclesModule } from './vehicles/vehicles.module';
 import { MailModule } from './mail/mail.module';
+import { IndicatorsModule } from './indicators/indicators.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { MailModule } from './mail/mail.module';
     ParkingsModule,
     VehiclesModule,
     MailModule,
+    IndicatorsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

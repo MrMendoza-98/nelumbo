@@ -35,6 +35,32 @@ export class VehiclesController {
     return this.vehiclesService.getVehicleInfo(plate);
   }
 
+  @Get('validate/:plate/:parkingId')
+  async validateVehicleInParking(
+    @Param('plate') plate: string,
+    @Param('parkingId') parkingId: number,
+  ) {
+    const isValid = await this.vehiclesService.isVehicleInParking(plate, parkingId);
+    
+    return {
+      plate,
+      parkingId,
+      isInParking: isValid,
+      message: isValid 
+        ? `El vehículo ${plate} está en el parqueadero ${parkingId}`
+        : `El vehículo ${plate} no está en el parqueadero ${parkingId}`,
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  @Get('info/:plate/:parkingId')
+  async getVehicleInfoInParking(
+    @Param('plate') plate: string,
+    @Param('parkingId') parkingId: number,
+  ) {
+    return this.vehiclesService.getVehicleInfoInParking(plate, parkingId);
+  }
+
   @Post('enviar-correo-registro')
   async enviarCorreoRegistro(
     @Body() body: {

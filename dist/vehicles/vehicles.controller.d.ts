@@ -17,6 +17,26 @@ export declare class VehiclesController {
         currentParkingId: number | null;
         currentEntryTime: Date | null;
     }>;
+    validateVehicleInParking(plate: string, parkingId: number): Promise<{
+        plate: string;
+        parkingId: number;
+        isInParking: boolean;
+        message: string;
+        timestamp: string;
+    }>;
+    getVehicleInfoInParking(plate: string, parkingId: number): Promise<{
+        id: number;
+        plate: string;
+        ownerName: string | undefined;
+        email: string | undefined;
+        createdAt: Date;
+        updatedAt: Date;
+        parkingInfo: {
+            parkingId: number;
+            entryTime: Date;
+            isCurrentlyParked: boolean;
+        };
+    }>;
     enviarCorreoRegistro(body: {
         email: string;
         placa: string;

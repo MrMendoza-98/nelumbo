@@ -48,7 +48,7 @@ API para gestionar parqueaderos de socios, registro de vehículos, historial, in
 - `src/users`: Usuarios y roles
 - `src/parkings`: Parqueaderos
 - `src/vehicles`: Vehículos y registros
-- `src/indicators`: Indicadores y reportes
+- `src/indicators`: **Sistema de indicadores y estadísticas** 📊
 - `src/mail`: **Microservicio de simulación de envío de correo** ✨
 - `src/common`: Utilidades, DTOs, pipes, guards
 
@@ -58,6 +58,7 @@ API para gestionar parqueaderos de socios, registro de vehículos, historial, in
 - Endpoints protegidos por roles y JWT
 - Validaciones y manejo de errores con excepciones
 - **Microservicio de correo con simulación completa** ✨
+- **Sistema de indicadores con top 10 vehículos más frecuentes** 📊
 - Documentación y colección Postman incluidas
 
 ## Ejemplo de configuración .env

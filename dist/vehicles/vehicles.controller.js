@@ -35,6 +35,21 @@ let VehiclesController = class VehiclesController {
     async getVehicleInfo(plate) {
         return this.vehiclesService.getVehicleInfo(plate);
     }
+    async validateVehicleInParking(plate, parkingId) {
+        const isValid = await this.vehiclesService.isVehicleInParking(plate, parkingId);
+        return {
+            plate,
+            parkingId,
+            isInParking: isValid,
+            message: isValid
+                ? `El vehículo ${plate} está en el parqueadero ${parkingId}`
+                : `El vehículo ${plate} no está en el parqueadero ${parkingId}`,
+            timestamp: new Date().toISOString()
+        };
+    }
+    async getVehicleInfoInParking(plate, parkingId) {
+        return this.vehiclesService.getVehicleInfoInParking(plate, parkingId);
+    }
     async enviarCorreoRegistro(body) {
         return this.vehiclesService.sendVehicleRegistrationEmail(body.email, body.placa, body.mensaje, body.parqueaderoId);
     }
@@ -73,6 +88,22 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], VehiclesController.prototype, "getVehicleInfo", null);
+__decorate([
+    (0, common_1.Get)('validate/:plate/:parkingId'),
+    __param(0, (0, common_1.Param)('plate')),
+    __param(1, (0, common_1.Param)('parkingId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Number]),
+    __metadata("design:returntype", Promise)
+], VehiclesController.prototype, "validateVehicleInParking", null);
+__decorate([
+    (0, common_1.Get)('info/:plate/:parkingId'),
+    __param(0, (0, common_1.Param)('plate')),
+    __param(1, (0, common_1.Param)('parkingId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Number]),
+    __metadata("design:returntype", Promise)
+], VehiclesController.prototype, "getVehicleInfoInParking", null);
 __decorate([
     (0, common_1.Post)('enviar-correo-registro'),
     __param(0, (0, common_1.Body)()),

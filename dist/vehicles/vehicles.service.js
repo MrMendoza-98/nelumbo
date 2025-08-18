@@ -19,20 +19,38 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const vehicle_entity_1 = require("./vehicle.entity");
 const parking_record_entity_1 = require("./parking-record.entity");
+const parking_entity_1 = require("../parkings/parking.entity");
+const parking_history_entity_1 = require("./parking-history.entity");
 const vehicle_notification_service_1 = require("./services/vehicle-notification.service");
 let VehiclesService = VehiclesService_1 = class VehiclesService {
     vehicleRepository;
     parkingRecordRepository;
+    parkingRepository;
+    historyRepository;
     notificationService;
     logger = new common_1.Logger(VehiclesService_1.name);
-    constructor(vehicleRepository, parkingRecordRepository, notificationService) {
+    constructor(vehicleRepository, parkingRecordRepository, parkingRepository, historyRepository, notificationService) {
         this.vehicleRepository = vehicleRepository;
         this.parkingRecordRepository = parkingRecordRepository;
+        this.parkingRepository = parkingRepository;
+        this.historyRepository = historyRepository;
         this.notificationService = notificationService;
     }
     async registreIngreso(plate, parkingId, email, ownerName) {
         this.logger.log(`Registrando ingreso del vehículo ${plate} al parqueadero ${parkingId}`);
+        const plateRegex = /^[A-Za-z0-9]{6}$/;
+        if (!plateRegex.test(plate) || plate.toLowerCase().includes('ñ')) {
+            throw new common_1.BadRequestException('La placa debe ser alfanumérica, de 6 caracteres, sin caracteres especiales ni la letra ñ');
+        }
         await this.validateVehicleNotParked(plate);
+        const parking = await this.parkingRepository.findOne({ where: { id: parkingId } });
+        if (!parking) {
+            throw new common_1.BadRequestException(`Parqueadero ${parkingId} no encontrado`);
+        }
+        const count = await this.parkingRecordRepository.count({ where: { parkingId, exitTime: (0, typeorm_2.IsNull)() } });
+        if (count >= parking.capacity) {
+            throw new common_1.BadRequestException(`El parqueadero ha alcanzado su capacidad máxima (${parking.capacity})`);
+        }
         const vehicle = await this.ensureVehicleExists(plate, email, ownerName);
         const parkingRecord = await this.createParkingRecord(plate, parkingId);
         let emailSent = false;
@@ -59,18 +77,48 @@ let VehiclesService = VehiclesService_1 = class VehiclesService {
             timestamp: new Date()
         };
     }
+    async isVehicleInParking(plate, parkingId) {
+        this.logger.log(`Validando que el vehículo ${plate} esté en el parqueadero ${parkingId}`);
+        try {
+            await this.validateVehicleInParking(plate, parkingId);
+            return true;
+        }
+        catch (error) {
+            return false;
+        }
+    }
     async registrarSalida(plate, parkingId) {
         this.logger.log(`Registrando salida del vehículo ${plate} del parqueadero ${parkingId}`);
         const parkingRecord = await this.findActiveParkingRecord(plate, parkingId);
         parkingRecord.exitTime = new Date();
+        const parking = await this.parkingRepository.findOne({ where: { id: parkingId } });
+        if (!parking) {
+            throw new common_1.BadRequestException(`Parqueadero ${parkingId} no encontrado`);
+        }
+        const entry = parkingRecord.entryTime.getTime();
+        const exit = parkingRecord.exitTime.getTime();
+        const hours = Math.ceil((exit - entry) / (1000 * 60 * 60));
+        parkingRecord.totalPrice = Number(parking.price_per_hour) * hours;
         await this.parkingRecordRepository.save(parkingRecord);
+        const vehicleEntity = await this.vehicleRepository.findOne({ where: { plate } });
+        if (!vehicleEntity) {
+            throw new common_1.BadRequestException(`Vehículo con placa ${plate} no encontrado para historial`);
+        }
+        const history = new parking_history_entity_1.ParkingHistory();
+        history.vehicle = vehicleEntity;
+        history.parking = parking;
+        history.entry_time = parkingRecord.entryTime;
+        history.exit_time = parkingRecord.exitTime;
+        history.total_price = parkingRecord.totalPrice;
+        await this.historyRepository.save(history);
         this.logger.log(`Salida registrada exitosamente para vehículo ${plate}`);
         return {
             success: true,
             message: 'Salida registrada exitosamente',
             plate,
             parkingId,
-            exitTime: parkingRecord.exitTime
+            exitTime: parkingRecord.exitTime,
+            totalPrice: parkingRecord.totalPrice
         };
     }
     async listVehiculosParqueados(parkingId) {
@@ -106,6 +154,32 @@ let VehiclesService = VehiclesService_1 = class VehiclesService {
             currentEntryTime: activeRecord?.entryTime || null
         };
     }
+    async getVehicleInfoInParking(plate, parkingId) {
+        this.logger.log(`Obteniendo información del vehículo ${plate} en parqueadero ${parkingId}`);
+        const vehicle = await this.vehicleRepository.findOne({ where: { plate } });
+        if (!vehicle) {
+            throw new common_1.BadRequestException(`Vehículo con placa ${plate} no encontrado`);
+        }
+        const parkingRecord = await this.parkingRecordRepository.findOne({
+            where: { plate, parkingId, exitTime: (0, typeorm_2.IsNull)() }
+        });
+        if (!parkingRecord) {
+            throw new common_1.BadRequestException(`El vehículo con placa ${plate} no se encuentra en el parqueadero ${parkingId}`);
+        }
+        return {
+            id: vehicle.id,
+            plate: vehicle.plate,
+            ownerName: vehicle.ownerName,
+            email: vehicle.email,
+            createdAt: vehicle.createdAt,
+            updatedAt: vehicle.updatedAt,
+            parkingInfo: {
+                parkingId: parkingRecord.parkingId,
+                entryTime: parkingRecord.entryTime,
+                isCurrentlyParked: true
+            }
+        };
+    }
     async sendVehicleRegistrationEmail(email, placa, mensaje, parqueaderoId) {
         this.logger.log(`Enviando correo de registro para vehículo ${placa}`);
         try {
@@ -131,7 +205,15 @@ let VehiclesService = VehiclesService_1 = class VehiclesService {
             where: { plate, exitTime: (0, typeorm_2.IsNull)() }
         });
         if (activeRecord) {
-            throw new common_1.BadRequestException(`El vehículo con placa ${plate} ya está parqueado en algún parqueadero`);
+            throw new common_1.BadRequestException(`El vehículo con placa ${plate} ya está parqueado en el parqueadero ${activeRecord.parkingId}`);
+        }
+    }
+    async validateVehicleInParking(plate, parkingId) {
+        const activeRecord = await this.parkingRecordRepository.findOne({
+            where: { plate, parkingId, exitTime: (0, typeorm_2.IsNull)() }
+        });
+        if (!activeRecord) {
+            throw new common_1.BadRequestException(`El vehículo con placa ${plate} no se encuentra en el parqueadero ${parkingId}`);
         }
     }
     async ensureVehicleExists(plate, email, ownerName) {
@@ -188,7 +270,11 @@ exports.VehiclesService = VehiclesService = VehiclesService_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(vehicle_entity_1.Vehicle)),
     __param(1, (0, typeorm_1.InjectRepository)(parking_record_entity_1.ParkingRecord)),
+    __param(2, (0, typeorm_1.InjectRepository)(parking_entity_1.Parking)),
+    __param(3, (0, typeorm_1.InjectRepository)(parking_history_entity_1.ParkingHistory)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository,
         vehicle_notification_service_1.VehicleNotificationService])
 ], VehiclesService);
