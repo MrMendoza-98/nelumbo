@@ -6,7 +6,8 @@ export interface TopVehiclesResponse {
     totalRegistrations: number;
     averageRegistrations: number;
     mostFrequentVehicle: string;
-    mostFrequentCount: number;
+  mostFrequentParkingId: number | null;
+  mostFrequentCount: number;
   };
   timestamp: Date;
 }

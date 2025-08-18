@@ -18,22 +18,25 @@ export class IndicatorsService {
 
   async getTop10MostFrequentVehicles(): Promise<TopVehiclesResponse> {
     this.logger.log('Obteniendo los 10 vehículos más frecuentes');
-    // Consulta agrupada por placa y cuenta de registros
+    // Consulta agrupada por placa, id de parqueadero y cuenta de registros
     const result = await this.parkingRecordRepository
       .createQueryBuilder('pr')
       .select('pr.plate', 'plate')
+      .addSelect('pr.parkingId', 'parkingId')
       .addSelect('COUNT(*)', 'count')
       .groupBy('pr.plate')
+      .addGroupBy('pr.parkingId')
       .orderBy('count', 'DESC')
       .limit(10)
       .getRawMany();
     return {
-      vehicles: result.map(r => ({ plate: r.plate, count: Number(r.count) })),
+      vehicles: result.map(r => ({ plate: r.plate, parkingId: r.parkingId, count: Number(r.count) })),
       total: result.length,
       summary: {
         totalRegistrations: result.reduce((sum, r) => sum + Number(r.count), 0),
         averageRegistrations: result.length > 0 ? result.reduce((sum, r) => sum + Number(r.count), 0) / result.length : 0,
         mostFrequentVehicle: result.length > 0 ? result[0].plate : '',
+        mostFrequentParkingId: result.length > 0 ? result[0].parkingId : null,
         mostFrequentCount: result.length > 0 ? Number(result[0].count) : 0,
       },
       timestamp: new Date(),
@@ -59,6 +62,7 @@ export class IndicatorsService {
         totalRegistrations: result.reduce((sum, r) => sum + Number(r.count), 0),
         averageRegistrations: result.length > 0 ? result.reduce((sum, r) => sum + Number(r.count), 0) / result.length : 0,
         mostFrequentVehicle: result.length > 0 ? result[0].plate : '',
+        mostFrequentParkingId: result.length > 0 ? (result[0].parkingId ?? null) : null,
         mostFrequentCount: result.length > 0 ? Number(result[0].count) : 0,
       },
       timestamp: new Date(),
