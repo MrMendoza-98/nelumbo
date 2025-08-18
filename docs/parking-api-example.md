@@ -66,22 +66,126 @@
   ```
 
 ### Vehículos
-- **POST /vehicles/register-entry**
-  ```json
+#### POST /vehicles/register-entry
+Registra el ingreso de un vehículo.
+Request:
+```json
+{
+  "plate": "ABC123",
+  "parkingId": 1,
+  "email": "owner@email.com",
+  "ownerName": "Juan Perez"
+}
+```
+Response:
+```json
+{
+  "message": "Vehicle entry registered successfully",
+  "recordId": 10
+}
+```
+
+#### POST /vehicles/register-exit
+Registra la salida de un vehículo.
+Request:
+```json
+{
+  "plate": "ABC123",
+  "parkingId": 1
+}
+```
+Response:
+```json
+{
+  "message": "Vehicle exit registered successfully",
+  "totalPrice": 6000
+}
+```
+
+#### GET /vehicles/parked/:parkingId
+Lista los vehículos parqueados en un parqueadero.
+Response:
+```json
+[
   {
     "plate": "ABC123",
-    "parkingId": 1,
-    "email": "owner@email.com",
-    "ownerName": "Juan Perez"
+    "entryTime": "2025-08-18T10:00:00Z"
   }
-  ```
-  Respuesta:
-  ```json
-  {
-    "message": "Vehicle entry registered successfully",
-    "recordId": 10
-  }
-  ```
+]
+```
+
+#### GET /vehicles/info/:plate
+Obtiene información de un vehículo por placa.
+Response:
+```json
+{
+  "plate": "ABC123",
+  "ownerName": "Juan Perez",
+  "email": "owner@email.com"
+}
+```
+
+#### GET /vehicles/validate/:plate/:parkingId
+Valida si un vehículo está parqueado en un parqueadero.
+Response:
+```json
+{
+  "plate": "ABC123",
+  "parkingId": 1,
+  "isInParking": true,
+  "message": "El vehículo ABC123 está en el parqueadero 1",
+  "timestamp": "2025-08-18T12:00:00Z"
+}
+```
+
+#### GET /vehicles/info/:plate/:parkingId
+Obtiene información de un vehículo en un parqueadero específico.
+Response:
+```json
+{
+  "plate": "ABC123",
+  "parkingId": 1,
+  "entryTime": "2025-08-18T10:00:00Z",
+  "ownerName": "Juan Perez"
+}
+```
+
+#### POST /vehicles/send-registration-email
+Envía un correo de registro de vehículo (simulado).
+Request:
+```json
+{
+  "email": "owner@email.com",
+  "plate": "ABC123",
+  "message": "Bienvenido",
+  "parkingId": 1
+}
+```
+Response:
+```json
+{
+  "message": "Email sent successfully (simulated)"
+}
+```
+
+#### POST /vehicles/full-registration
+Registro completo de vehículo con envío de correo.
+Request:
+```json
+{
+  "plate": "ABC123",
+  "parkingId": 1,
+  "email": "owner@email.com",
+  "ownerName": "Juan Perez"
+}
+```
+Response:
+```json
+{
+  "message": "Vehicle entry registered successfully",
+  "recordId": 10
+}
+```
 - **POST /vehicles/register-exit**
   ```json
   {
@@ -118,28 +222,90 @@
   ```
 
 ### Indicadores
-- **GET /indicators/top-vehicles**
-  Respuesta:
-  ```json
+#### GET /indicators/top-vehicles
+Top 10 vehículos más frecuentes en todos los parqueaderos.
+Response:
+```json
+{
+  "vehicles": [
+    {
+      "plate": "ABC123",
+      "parkingId": 1,
+      "count": 5
+    }
+  ],
+  "total": 1,
+  "summary": {
+    "totalRegistrations": 5,
+    "averageRegistrations": 5,
+    "mostFrequentVehicle": "ABC123",
+    "mostFrequentParkingId": 1,
+    "mostFrequentCount": 5
+  },
+  "timestamp": "2025-08-18T12:00:00Z"
+}
+```
+
+#### GET /indicators/top-vehicles/parking/:parkingId
+Top 10 vehículos más frecuentes en un parqueadero específico.
+Response:
+```json
+{
+  "vehicles": [
+    {
+      "plate": "ABC123",
+      "parkingId": 1,
+      "count": 5
+    }
+  ],
+  "total": 1,
+  "summary": {
+    "totalRegistrations": 5,
+    "averageRegistrations": 5,
+    "mostFrequentVehicle": "ABC123",
+    "mostFrequentParkingId": 1,
+    "mostFrequentCount": 5
+  },
+  "timestamp": "2025-08-18T12:00:00Z"
+}
+```
+
+#### GET /indicators/first-time-parked/:parkingId
+Vehículos parqueados por primera vez en un parqueadero.
+Response:
+```json
+[
   {
-    "vehicles": [
-      {
-        "plate": "ABC123",
-        "parkingId": 1,
-        "count": 5
-      }
-    ],
-    "total": 1,
-    "summary": {
-      "totalRegistrations": 5,
-      "averageRegistrations": 5,
-      "mostFrequentVehicle": "ABC123",
-      "mostFrequentParkingId": 1,
-      "mostFrequentCount": 5
-    },
-    "timestamp": "2025-08-18T12:00:00Z"
+    "plate": "XYZ789",
+    "entryTime": "2025-08-18T11:00:00Z"
   }
-  ```
+]
+```
+
+#### GET /indicators/earnings/:parkingId
+Ganancias por parqueadero.
+Response:
+```json
+{
+  "today": 6000,
+  "week": 42000,
+  "month": 180000,
+  "year": 1200000
+}
+```
+
+#### GET /indicators/search-parked?plate=ABC
+Buscar vehículos parqueados por coincidencia parcial en la placa.
+Response:
+```json
+[
+  {
+    "plate": "ABC123",
+    "entryTime": "2025-08-18T10:00:00Z",
+    "parkingId": 1
+  }
+]
+```
 - **GET /indicators/earnings/:parkingId**
   Respuesta:
   ```json
