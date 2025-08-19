@@ -12,9 +12,7 @@ export class VehicleNotificationService {
     private readonly parkingsService: ParkingsService,
   ) {}
 
-  /**
-   * Envía notificación de registro de vehículo
-   */
+  
   async sendRegistrationNotification(data: EmailNotificationData): Promise<boolean> {
     try {
       this.logger.log(`Enviando notificación de registro para vehículo ${data.plate}`);
@@ -44,20 +42,19 @@ export class VehicleNotificationService {
     const currentTime = new Date().toLocaleString('es-ES');
     
     return `¡Bienvenido a Nelumbo!
+    Su vehículo con placa ${data.plate} ha sido registrado exitosamente.
 
-Su vehículo con placa ${data.plate} ha sido registrado exitosamente.
+    📋 Detalles del registro:
+    • Placa: ${data.plate}
+    • Parqueadero: ${parkingName}
+    • Hora de entrada: ${currentTime}
+    • Estado: ✅ Activo
 
-📋 Detalles del registro:
-• Placa: ${data.plate}
-• Parqueadero: ${parkingName}
-• Hora de entrada: ${currentTime}
-• Estado: ✅ Activo
+    ${data.ownerName ? `👤 Propietario: ${data.ownerName}` : ''}
 
-${data.ownerName ? `👤 Propietario: ${data.ownerName}` : ''}
+    🚗 Su vehículo ya está registrado en nuestro sistema.
 
-🚗 Su vehículo ya está registrado en nuestro sistema.
-
-Saludos,
-Equipo Nelumbo`;
+    Saludos,
+    Equipo Nelumbo`;
   }
 }

@@ -13,9 +13,9 @@ export declare class VehiclesService {
     private readonly notificationService;
     private readonly logger;
     constructor(vehicleRepository: Repository<Vehicle>, parkingRecordRepository: Repository<ParkingRecord>, parkingRepository: Repository<Parking>, historyRepository: Repository<ParkingHistory>, notificationService: VehicleNotificationService);
-    registreIngreso(plate: string, parkingId: number, email?: string, ownerName?: string): Promise<VehicleRegistrationResult>;
+    registerEntry(plate: string, parkingId: number, email?: string, ownerName?: string): Promise<VehicleRegistrationResult>;
     isVehicleInParking(plate: string, parkingId: number): Promise<boolean>;
-    registrarSalida(plate: string, parkingId: number): Promise<VehicleExitResult>;
+    registerExit(plate: string, parkingId: number): Promise<VehicleExitResult>;
     listVehiculosParqueados(parkingId: number): Promise<ParkedVehicle[]>;
     getVehicleInfo(plate: string): Promise<{
         id: number;

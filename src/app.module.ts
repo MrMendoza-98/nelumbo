@@ -21,7 +21,7 @@ import { IndicatorsModule } from './indicators/indicators.module';
       password: process.env.DB_PASS,
       database: process.env.DB_NAME,
       autoLoadEntities: true,
-      synchronize: true, // Solo para desarrollo
+      synchronize: true,
     }),
     UsersModule,
     AuthModule,

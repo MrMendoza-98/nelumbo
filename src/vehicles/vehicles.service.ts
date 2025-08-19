@@ -30,9 +30,9 @@ export class VehiclesService {
   ) {}
 
   /**
-   * Registra el ingreso de un vehículo al parqueadero
+   * Registra la entrada de un vehículo al parqueadero
    */
-  async registreIngreso(
+  async registerEntry(
     plate: string,
     parkingId: number,
     email?: string,
@@ -40,16 +40,16 @@ export class VehiclesService {
   ): Promise<VehicleRegistrationResult> {
     this.logger.log(`Registrando ingreso del vehículo ${plate} al parqueadero ${parkingId}`);
 
-    // Validar formato de placa
+    // Valida el formato de  la placa
     const plateRegex = /^[A-Za-z0-9]{6}$/;
     if (!plateRegex.test(plate) || plate.toLowerCase().includes('ñ')) {
       throw new BadRequestException('La placa debe ser alfanumérica, de 6 caracteres, sin caracteres especiales ni la letra ñ');
     }
 
-    // Validar que el vehículo no esté ya parqueado en ningún parqueadero
+    // Valida que el vehículo no esté parqueado
     await this.validateVehicleNotParked(plate);
 
-    // Validar capacidad máxima del parqueadero
+    // Valida la capacidad máxima del parqueadero
     const parking = await this.parkingRepository.findOne({ where: { id: parkingId } });
     if (!parking) {
       throw new BadRequestException(`Parqueadero ${parkingId} no encontrado`);
@@ -59,11 +59,10 @@ export class VehiclesService {
       throw new BadRequestException(`El parqueadero ha alcanzado su capacidad máxima (${parking.capacity})`);
     }
 
-    // Registrar el vehículo y el ingreso
     const vehicle = await this.ensureVehicleExists(plate, email, ownerName);
     const parkingRecord = await this.createParkingRecord(plate, parkingId);
 
-    // Enviar notificación por email si se proporciona
+    
     let emailSent = false;
     let emailMessage = '';
     
@@ -109,13 +108,13 @@ export class VehiclesService {
   /**
    * Registra la salida de un vehículo del parqueadero
    */
-  async registrarSalida(plate: string, parkingId: number): Promise<VehicleExitResult> {
+  async registerExit(plate: string, parkingId: number): Promise<VehicleExitResult> {
     this.logger.log(`Registrando salida del vehículo ${plate} del parqueadero ${parkingId}`);
 
     const parkingRecord = await this.findActiveParkingRecord(plate, parkingId);
     parkingRecord.exitTime = new Date();
 
-    // Calcular precio automático
+    
     const parking = await this.parkingRepository.findOne({ where: { id: parkingId } });
     if (!parking) {
       throw new BadRequestException(`Parqueadero ${parkingId} no encontrado`);
@@ -127,7 +126,7 @@ export class VehiclesService {
 
     await this.parkingRecordRepository.save(parkingRecord);
 
-    // Mover a historial
+    
     const vehicleEntity = await this.vehicleRepository.findOne({ where: { plate } });
     if (!vehicleEntity) {
       throw new BadRequestException(`Vehículo con placa ${plate} no encontrado para historial`);
@@ -153,7 +152,7 @@ export class VehiclesService {
   }
 
   /**
-   * Lista los vehículos actualmente parqueados en un parqueadero
+   * Lista los vehículos parqueados en un parqueadero
    */
   async listVehiculosParqueados(parkingId: number): Promise<ParkedVehicle[]> {
     this.logger.log(`Listando vehículos parqueados en parqueadero ${parkingId}`);
@@ -181,7 +180,7 @@ export class VehiclesService {
       throw new BadRequestException(`Vehículo con placa ${plate} no encontrado`);
     }
 
-    // Buscar si está actualmente parqueado
+    
     const activeRecord = await this.parkingRecordRepository.findOne({
       where: { plate, exitTime: IsNull() }
     });
@@ -200,7 +199,7 @@ export class VehiclesService {
   }
 
   /**
-   * Obtiene información de un vehículo en un parqueadero específico
+   * Obtiene la información de un vehículo en un parqueadero específico
    */
   async getVehicleInfoInParking(plate: string, parkingId: number) {
     this.logger.log(`Obteniendo información del vehículo ${plate} en parqueadero ${parkingId}`);
@@ -210,7 +209,7 @@ export class VehiclesService {
       throw new BadRequestException(`Vehículo con placa ${plate} no encontrado`);
     }
 
-    // Buscar si está parqueado en el parqueadero específico
+    
     const parkingRecord = await this.parkingRecordRepository.findOne({
       where: { plate, parkingId, exitTime: IsNull() }
     });
@@ -235,7 +234,7 @@ export class VehiclesService {
   }
 
   /**
-   * Envía correo de registro de vehículo (método legacy para compatibilidad)
+   * Envía el correo de registro de vehículo
    */
   async sendVehicleRegistrationEmail(
     email: string,
@@ -263,10 +262,9 @@ export class VehiclesService {
     }
   }
 
-  // Métodos privados para mantener el código limpio
 
   /**
-   * Valida que el vehículo no esté ya parqueado en ningún parqueadero
+   * Valida que el vehículo no esté parqueado en ningún parqueadero
    */
   private async validateVehicleNotParked(plate: string): Promise<void> {
     const activeRecord = await this.parkingRecordRepository.findOne({
@@ -292,13 +290,13 @@ export class VehiclesService {
   }
 
   /**
-   * Asegura que el vehículo existe en la base de datos
+   * Revisa que el vehículo existe en la base de datos
    */
   private async ensureVehicleExists(plate: string, email?: string, ownerName?: string): Promise<Vehicle> {
     let vehicle = await this.vehicleRepository.findOne({ where: { plate } });
     
     if (!vehicle) {
-      // Crear nuevo vehículo con información del propietario
+      
       vehicle = this.vehicleRepository.create({ 
         plate,
         email,
@@ -307,7 +305,7 @@ export class VehiclesService {
       await this.vehicleRepository.save(vehicle);
       this.logger.log(`Nuevo vehículo creado con placa ${plate} y propietario ${ownerName || 'No especificado'}`);
     } else if (email && ownerName) {
-      // Actualizar información del propietario si no estaba disponible antes
+      
       if (!vehicle.email || !vehicle.ownerName) {
         vehicle.email = email;
         vehicle.ownerName = ownerName;

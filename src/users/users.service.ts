@@ -11,15 +11,26 @@ export class UsersService implements OnModuleInit {
     private readonly userRepository: Repository<User>,
   ) {}
 
+  /**
+   * Inicializa el módulo y crea el usuario administrador si no existe.
+   */
   async onModuleInit() {
     await this.createAdminIfNotExists();
   }
 
+  /**
+   * Busca un usuario por su correo electrónico.
+   * @param email Correo electrónico del usuario
+   * @returns El usuario encontrado o undefined
+   */
   async findByEmail(email: string): Promise<User | undefined> {
     const user = await this.userRepository.findOne({ where: { email } });
     return user ?? undefined;
   }
 
+  /**
+   * Crea el usuario administrador por defecto si no existe.
+   */
   async createAdminIfNotExists(): Promise<void> {
     const adminEmail = 'admin@mail.com';
     const adminPass = 'admin';
@@ -31,14 +42,23 @@ export class UsersService implements OnModuleInit {
     }
   }
 
+  /**
+   * Crea un nuevo usuario.
+   * @param data Datos del usuario
+   * @returns El usuario creado
+   */
   async createUser(data: Partial<User>): Promise<User> {
     const user = this.userRepository.create(data);
     return this.userRepository.save(user);
   }
 
+  /**
+   * Obtiene todos los usuarios registrados.
+   * @returns Array de usuarios
+   */
   async findAll(): Promise<User[]> {
     return this.userRepository.find();
   }
 
-  // Métodos CRUD y lógica de negocio aquí
+
 }

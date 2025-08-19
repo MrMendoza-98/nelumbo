@@ -36,7 +36,7 @@ let VehiclesService = VehiclesService_1 = class VehiclesService {
         this.historyRepository = historyRepository;
         this.notificationService = notificationService;
     }
-    async registreIngreso(plate, parkingId, email, ownerName) {
+    async registerEntry(plate, parkingId, email, ownerName) {
         this.logger.log(`Registrando ingreso del vehículo ${plate} al parqueadero ${parkingId}`);
         const plateRegex = /^[A-Za-z0-9]{6}$/;
         if (!plateRegex.test(plate) || plate.toLowerCase().includes('ñ')) {
@@ -87,7 +87,7 @@ let VehiclesService = VehiclesService_1 = class VehiclesService {
             return false;
         }
     }
-    async registrarSalida(plate, parkingId) {
+    async registerExit(plate, parkingId) {
         this.logger.log(`Registrando salida del vehículo ${plate} del parqueadero ${parkingId}`);
         const parkingRecord = await this.findActiveParkingRecord(plate, parkingId);
         parkingRecord.exitTime = new Date();

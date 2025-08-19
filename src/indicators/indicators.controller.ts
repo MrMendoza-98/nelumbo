@@ -19,10 +19,6 @@ import { Roles } from '../common/decorators/roles.decorator';
 export class IndicatorsController {
   constructor(private readonly indicatorsService: IndicatorsService) {}
 
-  /**
-   * Obtiene los 10 vehículos que más veces se han registrado en los diferentes parqueaderos
-   * @returns Top 10 vehículos más frecuentes
-   */
   @Get('top-vehicles')
   @HttpCode(HttpStatus.OK)
   @Roles('ADMIN', 'SOCIO')
@@ -30,11 +26,6 @@ export class IndicatorsController {
     return this.indicatorsService.getTop10MostFrequentVehicles();
   }
 
-  /**
-   * Obtiene los 10 vehículos más registrados en un parqueadero específico
-   * @param parkingId - ID del parqueadero
-   * @returns Top 10 vehículos en el parqueadero
-   */
   @Get('top-vehicles/parking/:parkingId')
   @HttpCode(HttpStatus.OK)
   @Roles('ADMIN', 'SOCIO')
@@ -44,11 +35,6 @@ export class IndicatorsController {
     return this.indicatorsService.getTop10VehiclesByParking(parkingId);
   }
 
-  /**
-   * Obtiene los vehículos actualmente parqueados por primera vez en un parqueadero
-   * @param parkingId - ID del parqueadero
-   * @returns Array de placas y fecha de ingreso
-   */
   @Get('first-time-parked/:parkingId')
   @HttpCode(HttpStatus.OK)
   @Roles('ADMIN', 'SOCIO')
@@ -58,11 +44,6 @@ export class IndicatorsController {
     return this.indicatorsService.getFirstTimeParkedVehicles(parkingId);
   }
 
-  /**
-   * Obtiene las ganancias de hoy, semana, mes y año de un parqueadero específico
-   * @param parkingId - ID del parqueadero
-   * @returns Ganancias agrupadas por periodo
-   */
   @Get('earnings/:parkingId')
   @HttpCode(HttpStatus.OK)
   @Roles('SOCIO')
@@ -72,11 +53,6 @@ export class IndicatorsController {
     return this.indicatorsService.getParkingEarnings(parkingId);
   }
 
-  /**
-   * Buscar vehículos parqueados por coincidencia parcial en la placa
-   * @param partialPlate - fragmento de placa
-   * @returns Array de vehículos parqueados que coinciden
-   */
   @Get('search-parked')
   @HttpCode(HttpStatus.OK)
   @Roles('ADMIN', 'SOCIO')

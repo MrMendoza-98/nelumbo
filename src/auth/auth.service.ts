@@ -10,6 +10,12 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
+  /**
+   * Valida las credenciales de un usuario.
+   * @param email Correo electrónico del usuario
+   * @param password Contraseña en texto plano
+   * @returns El usuario si las credenciales son correctas, null si no.
+   */
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.usersService.findByEmail(email);
     if (user && await bcrypt.compare(password, user.password)) {
@@ -18,6 +24,11 @@ export class AuthService {
     return null;
   }
 
+  /**
+   * Genera el token JWT para el usuario autenticado.
+   * @param user Objeto usuario validado
+   * @returns Objeto con el access_token y tiempo de expiración
+   */
   async login(user: any) {
     const payload = { email: user.email, sub: user.id, role: user.role };
     return {

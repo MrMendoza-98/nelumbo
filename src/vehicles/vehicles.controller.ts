@@ -13,7 +13,7 @@ export class VehiclesController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('SOCIO')
   async registerEntry(@Body(new ValidationPipe()) body: VehicleRegistrationDto) {
-    const result = await this.vehiclesService.registreIngreso(
+  const result = await this.vehiclesService.registerEntry(
       body.plate, 
       body.parkingId, 
       body.email, 
@@ -27,7 +27,7 @@ export class VehiclesController {
   @Roles('SOCIO')
   @HttpCode(200)
   async registerExit(@Body(new ValidationPipe()) body: VehicleExitDto) {
-    const result = await this.vehiclesService.registrarSalida(body.plate, body.parkingId);
+  const result = await this.vehiclesService.registerExit(body.plate, body.parkingId);
     return result;
   }
 
@@ -94,7 +94,7 @@ export class VehiclesController {
   async fullRegistration(
     @Body(new ValidationPipe()) body: VehicleRegistrationWithEmailDto,
   ) {
-    const result = await this.vehiclesService.registreIngreso(
+  const result = await this.vehiclesService.registerEntry(
       body.plate, 
       body.parkingId, 
       body.email, 

@@ -8,10 +8,10 @@ RUN npm install
 
 COPY . .
 
-# Variables de entorno para producción
+
 ENV NODE_ENV=production
 
-# Expone el puerto de NestJS
+
 EXPOSE 3000
 
 CMD ["npm", "run", "start:prod"]

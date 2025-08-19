@@ -16,9 +16,12 @@ export class IndicatorsService {
     private readonly parkingRecordRepository: Repository<ParkingRecord>,
   ) {}
 
+  /**
+   * Obtiene los 10 vehículos más frecuentes en los diferentes parqueaderos.
+   * @returns Un objeto con el top de vehículos, totales y resumen.
+   */
   async getTop10MostFrequentVehicles(): Promise<TopVehiclesResponse> {
     this.logger.log('Obteniendo los 10 vehículos más frecuentes');
-    // Consulta agrupada por placa, id de parqueadero y cuenta de registros
     const result = await this.parkingRecordRepository
       .createQueryBuilder('pr')
       .select('pr.plate', 'plate')
@@ -43,9 +46,14 @@ export class IndicatorsService {
     };
   }
 
+  /**
+   * Obtiene los 10 vehículos más frecuentes en un parqueadero en específico.
+   * @param parkingId ID del parqueadero
+   * @returns Un objeto con el top de vehículos, totales y resumen.
+   */
   async getTop10VehiclesByParking(parkingId: number): Promise<TopVehiclesResponse> {
     this.logger.log(`Obteniendo los 10 vehículos más frecuentes en el parqueadero ${parkingId}`);
-    // Consulta agrupada por placa y cuenta de registros, filtrando por el parqueadero
+    // Consulta que agrupa por placa y cuenta los registros, filtrando  el parqueadero
     const result = await this.parkingRecordRepository
       .createQueryBuilder('pr')
       .select('pr.plate', 'plate')
@@ -69,13 +77,18 @@ export class IndicatorsService {
     };
   }
 
+  /**
+   * Obtiene los vehículos que se han parqueado por primera vez en un parqueadero.
+   * @param parkingId ID del parqueadero
+   * @returns Array de placas y fecha de ingreso.
+   */
   async getFirstTimeParkedVehicles(parkingId: number): Promise<{ plate: string; entryTime: Date }[]> {
     this.logger.log(`Obteniendo vehículos parqueados por primera vez en el parqueadero ${parkingId}`);
-    // Vehículos actualmente parqueados en el parking
+    
     const currentRecords = await this.parkingRecordRepository.find({ where: { parkingId, exitTime: require('typeorm').IsNull() } });
     const firstTimers: { plate: string; entryTime: Date }[] = [];
     for (const record of currentRecords) {
-      // ¿Es la primera vez que este vehículo se parquea aquí?
+      
       const totalRecords = await this.parkingRecordRepository.count({ where: { plate: record.plate, parkingId } });
       if (totalRecords === 1) {
         firstTimers.push({ plate: record.plate, entryTime: record.entryTime });
@@ -84,6 +97,11 @@ export class IndicatorsService {
     return firstTimers;
   }
 
+  /**
+   * Obtiene las ganancias del día, semana, mes y año de un parqueadero.
+   * @param parkingId ID del parqueadero
+   * @returns Retorna objeto con las ganancias agrupadas por periodo.
+   */
   async getParkingEarnings(parkingId: number): Promise<{ today: number; week: number; month: number; year: number }> {
     const now = new Date();
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -93,7 +111,7 @@ export class IndicatorsService {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const startOfYear = new Date(now.getFullYear(), 0, 1);
 
-    // Helper para sumar ganancias
+    
     const sumEarnings = async (start: Date, end: Date) => {
       const records = await this.parkingRecordRepository.find({
         where: {
@@ -112,6 +130,11 @@ export class IndicatorsService {
     return { today, week, month, year };
   }
 
+  /**
+   * Busca los vehículos parqueados por coincidencias en la placa.
+   * @param partialPlate Fragmento de placa
+   * @returns Array de vehículos parqueados que coinciden.
+   */
   async searchParkedVehiclesByPlate(partialPlate: string): Promise<{ plate: string; entryTime: Date; parkingId: number }[]> {
     this.logger.log(`Buscando vehículos parqueados con coincidencia en placa: ${partialPlate}`);
     const records = await this.parkingRecordRepository.find({

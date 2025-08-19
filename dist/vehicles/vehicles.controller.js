@@ -25,11 +25,11 @@ let VehiclesController = class VehiclesController {
         this.vehiclesService = vehiclesService;
     }
     async registerEntry(body) {
-        const result = await this.vehiclesService.registreIngreso(body.plate, body.parkingId, body.email, body.ownerName);
+        const result = await this.vehiclesService.registerEntry(body.plate, body.parkingId, body.email, body.ownerName);
         return result;
     }
     async registerExit(body) {
-        const result = await this.vehiclesService.registrarSalida(body.plate, body.parkingId);
+        const result = await this.vehiclesService.registerExit(body.plate, body.parkingId);
         return result;
     }
     async listParkedVehicles(parkingId) {
@@ -57,7 +57,7 @@ let VehiclesController = class VehiclesController {
         return this.vehiclesService.sendVehicleRegistrationEmail(body.email, body.plate, body.message, body.parkingId);
     }
     async fullRegistration(body) {
-        const result = await this.vehiclesService.registreIngreso(body.plate, body.parkingId, body.email, body.ownerName);
+        const result = await this.vehiclesService.registerEntry(body.plate, body.parkingId, body.email, body.ownerName);
         return result;
     }
 };
